@@ -93,11 +93,8 @@ void printData(DataRow* data) {
     // printf("\n");
 }
 
-uint16_t isSafe(DataRow* data) {
-    int8_t direction = 0;
-
-    for(uint8_t i=1; i < data->size; i++) {
-        int8_t difference = data->data[i] - data->data[i-1];
+uint8_t isSafePair(uint8_t a, uint8_t b, int8_t* direction) {
+        int8_t difference = a -b;
         if (difference == 0) {
             return 0;
         }
@@ -107,24 +104,65 @@ uint16_t isSafe(DataRow* data) {
             if (difference < -3) {
                 return 0;
             }
-            if (direction == ASCENDING) {
+            if (*direction == ASCENDING) {
                 return 0;
             }
-            direction = DESCENDING;
+            *direction = DESCENDING;
         } else {
             if (difference > 3) {
                 return 0;
             }
-            if (direction == DESCENDING) {
+            if (*direction == DESCENDING) {
                 return 0;
             }
-            direction = ASCENDING;
+            *direction = ASCENDING;
+        }
+    return 1;
+}
+
+uint8_t isSafeRow(uint8_t* numbers, uint8_t size) {
+    int8_t direction = 0;
+
+    for(uint8_t i=1; i < size; i++) {
+        if (isSafePair(numbers[i], numbers[i-1], &direction) == 0){
+            return 0;
         }
     }
-    printData(data);
-    printf(" is safe\n");
     return 1;
+}
 
+uint8_t* listWithSkippedEntry(DataRow* data, uint8_t skippedIndex) {
+    uint8_t* result = malloc(sizeof(uint8_t) * (data->size-1));
+
+    uint8_t writeIndex = 0;
+    for(uint8_t readIndex=0; readIndex < data->size; readIndex++) {
+        if (readIndex == skippedIndex) {
+            continue;
+        } else {
+            result[writeIndex++] = data->data[readIndex];
+        }
+
+    }
+    return result;
+}
+
+uint8_t isSafe(DataRow* data) {
+    int8_t direction = 0;
+
+    if (isSafeRow(data->data, data->size) != 0) {
+         return 1;
+    }
+
+    for(uint8_t i=0; i < data->size; i++) {
+        uint8_t* skippedList = listWithSkippedEntry(data, i);
+        uint8_t result = isSafeRow(skippedList, data->size-1);
+        free(skippedList);
+        if (result != 0) {
+            return 1;
+        }
+    }
+    
+    return 0;
 }
 
 
