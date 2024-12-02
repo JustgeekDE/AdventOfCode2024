@@ -17,17 +17,13 @@ typedef struct DataRow{
 } DataRow;
 
 uint8_t getNrOfNumbers(char* line){
-
-    char* current = line;
-    uint8_t count = 1;
+   uint8_t count = 1;
     while (*line != '\0') {
-        if (*line == ' ' ) {
+        if (*line++ == ' ' ) {
             count++;
         }
-        line++;
     }
     return count;
-
 }
 
 DataRow* parseLine(char* line) {
@@ -41,16 +37,13 @@ DataRow* parseLine(char* line) {
     uint8_t* number = data->data;
     char* ptr = line;
 
-    while (sscanf(ptr, "%2" SCNu8, number) == 1) {
-            number++;
-
+    while (sscanf(ptr, "%2" SCNu8, number++) == 1) {
             char *next_space = strchr(ptr, ' ');
             if (next_space == NULL) {
                 break; // No more spaces, exit the loop
             }
             ptr = next_space + 1;
         }
-
     return data;
 
 }
@@ -90,7 +83,6 @@ void printData(DataRow* data) {
     for(uint8_t i=0; i <= data->size; i++) {
         printf(" %d", data->data[i]);
     }
-    // printf("\n");
 }
 
 uint8_t isSafePair(uint8_t a, uint8_t b, int8_t* direction) {
@@ -98,7 +90,6 @@ uint8_t isSafePair(uint8_t a, uint8_t b, int8_t* direction) {
         if (difference == 0) {
             return 0;
         }
-        // printf("%d: %d - %d = %d\n",i, data->data[i], data->data[i-1],difference);
 
         if (difference < 0) {
             if (difference < -3) {
@@ -161,7 +152,7 @@ uint8_t isSafe(DataRow* data) {
             return 1;
         }
     }
-    
+
     return 0;
 }
 
