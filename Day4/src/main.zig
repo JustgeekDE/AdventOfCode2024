@@ -46,6 +46,28 @@ pub fn readInput(allocator: std.mem.Allocator, filePath: []const u8) !PuzzleData
     };
 }
 
+pub fn findMas(puzzleData: *PuzzleData) u32 {
+    const max_x = puzzleData.max_x;
+    const max_y = puzzleData.max_y;
+    var result:u32 = 0;
+
+    var x:i32 = 0;
+    var y:i32 = 0;
+
+    while(y < max_y) {
+        x = 0;
+        while(x < max_x) {
+            if (checkCharacter(x,y, 'A', puzzleData)){
+                std.debug.print("Found an X: {d}/{d}\n", .{x, y});
+                result += startMasSeach(x,y,puzzleData);
+            }
+            x += 1;
+        }
+        y += 1;
+    }
+    return result;
+}
+
 pub fn findXMas(puzzleData: *PuzzleData) u32 {
     const max_x = puzzleData.max_x;
     const max_y = puzzleData.max_y;
@@ -112,6 +134,30 @@ pub fn startSeach(x: i32, y: i32, puzzleData: *PuzzleData) u32 {
     return result;
 }
 
+pub fn startMasSeach(x: i32, y: i32, puzzleData: *PuzzleData) u32 {
+    if (checkDiagonal(x,y, true, puzzleData) and checkDiagonal(x,y, false, puzzleData)) {
+        return 1;
+    }
+    return 0;
+}
+
+pub fn checkDiagonal(x: i32, y: i32, backward: bool, puzzleData: *PuzzleData) bool {
+    const modifier:i32 = if (backward) -1 else 1;
+    if ( checkCharacter(x, y, 'A', puzzleData) == false) {
+        return false;
+    }
+
+    if (checkCharacter(x-(modifier * 1), y-1  , 'M', puzzleData) and checkCharacter(x+(modifier * 1), y+1, 'S', puzzleData)) {
+        return true;
+    }
+    if (checkCharacter(x+(modifier * 1), y+1, 'M', puzzleData) and checkCharacter(x-(modifier * 1), y-1, 'S', puzzleData)) {
+        return true;
+    }
+    return false;
+}
+
+
+
 pub fn findString(x: i32, y: i32, direction: Direction, remaining_string: []const u8, puzzleData: *PuzzleData) bool {
     if (remaining_string.len < 1) {
         return true;
@@ -149,7 +195,7 @@ pub fn main() !void {
     var puzzleData = try readInput(allocator, filePath); 
     defer puzzleData.free(allocator);  
     
-    const result = findXMas(&puzzleData);
+    const result = findMas(&puzzleData);
 
     // Print the processed lines
     for (puzzleData.contents) |line| {
