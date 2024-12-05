@@ -154,7 +154,8 @@ end
 
 ordering, manuals = parseInput("input")
 
-resultValue = 0
+resultA = 0
+resultB = 0
 for i, manual in ipairs(manuals) do
     filteredRules = filterRules(ordering, manual)
     orderedList = createOrder(filteredRules)
@@ -165,11 +166,12 @@ for i, manual in ipairs(manuals) do
     if valid then
         middleValue = getMiddle(manual)
         print ("correct: ", middleValue)
-        resultValue = resultValue + middleValue
+        resultA = resultA + middleValue
     else
         print "wrong"
+        resultB = resultB + getMiddle(orderedList)
 
     end
 end
 
-print("Result: ", resultValue)
+print("Results: ", resultA, " ", resultB)
