@@ -6,13 +6,20 @@ function parseInput ( filename )
     local manuals = {}
     if file then
         for line in file:lines() do
-            -- print(line) -- Print each line
             local num1, num2 = line:match("(%d+)|(%d+)")
             if num1 and num2 then
-                num1 = tonumber(num1) -- Convert the first captured value to a number
-                num2 = tonumber(num2) -- Convert the second captured value to a number
-                -- print(num1, num2) -- Output: 47  53
+                num1 = tonumber(num1) 
+                num2 = tonumber(num2)
                 table.insert(ordering, {num1, num2})
+            else
+                if #line > 0 then
+                    entry = {}
+                    for num in string.gmatch(line, "%d+") do
+                        table.insert(entry, tonumber(num))
+                    end
+                    -- print("Manual ", table.concat(entry, ", "))
+                    table.insert(manuals, entry)
+                end
             end
             
         end
@@ -23,12 +30,22 @@ function parseInput ( filename )
     return ordering, manuals
 end
 
+function getDictKeys(dict) 
+    local keys = {} 
+    for key, _ in pairs(dict) do
+        table.insert(keys, key) 
+    end
+    return keys
+end
+
 function findLeftOnlyValues(ordering)
     leftOnlies = {}
     for i, order in ipairs(ordering) do
         leftOnlies[order[1]] = true
     end
     for i, order in ipairs(ordering) do
+        print ("Processing : ", order[1], " ", order[2])
+        print("Lefties ", table.concat(getDictKeys(leftOnlies), ", "))
         if leftOnlies[order[2]] then
             leftOnlies[order[2]] = nil
         end
@@ -53,17 +70,89 @@ end
 
 function createOrder(ordering) 
     resultOrder = {}
+    allValues = {}
+
+    for i, pair in ipairs(ordering) do
+        allValues[pair[1]] = true
+        allValues[pair[2]] = true
+    end
+
+
     while #ordering > 0 do
         leftOnlies = findLeftOnlyValues(ordering)
         for i, value in ipairs(leftOnlies) do
             table.insert(resultOrder, value)
             removeLeftValue(ordering, value)
+            allValues[value] = nil
         end
         print("New order ", table.concat(resultOrder, ", "))
     end
+
+    count = 0
+    for key, value in pairs(allValues) do
+        count = count + 1
+        -- print("Remaining unordered ", key)
+        table.insert(resultOrder, key)
+    end
+
+    if count > 1 then
+        print("Multiple values without clear order found, revise this algorithm")
+    end
+
+
     return resultOrder    
 end
 
-ordering, manuals = parseInput("example.txt")
-orderedList = createOrder(ordering)
+function findInList(list, target)
+    for i, value in ipairs(list) do
+        if value == target then
+            return i
+        end
+    end
+    return nil
+end
 
+function checkManual(orderedList, manual) 
+
+    currentIndex = 0
+    for i, value in ipairs(manual) do
+        idx = findInList(orderedList, value)
+        -- print ("Value ", value, " has index ", idx, " current index is :", currentIndex)
+        if idx then
+            if idx < currentIndex then
+                return false
+            end
+            currentIndex = idx
+        end
+    end
+
+
+    return true
+end
+
+function getMiddle(list)
+    length = #list
+    middleValue = list[math.ceil(length/2)]
+    -- print ("List: ", table.concat(list, ", "))
+    -- print("Middle is ", length/2, " with value ", middleValue)
+    return middleValue
+end
+
+ordering, manuals = parseInput("input")
+orderedList = createOrder(ordering)
+print("New order ", table.concat(orderedList, ", "))
+
+result = 0
+for i, manual in ipairs(manuals) do
+    valid = checkManual(orderedList, manual)
+    print ("Manual", table.concat(manual, ", "), " is ")
+    if valid then
+        print "correct"
+        result = result + getMiddle(manual)
+    else
+        print "wrong"
+
+    end
+end
+
+print("Result: ", result)
