@@ -44,8 +44,8 @@ function findLeftOnlyValues(ordering)
         leftOnlies[order[1]] = true
     end
     for i, order in ipairs(ordering) do
-        print ("Processing : ", order[1], " ", order[2])
-        print("Lefties ", table.concat(getDictKeys(leftOnlies), ", "))
+        -- print ("Processing : ", order[1], " ", order[2])
+        -- print("Lefties ", table.concat(getDictKeys(leftOnlies), ", "))
         if leftOnlies[order[2]] then
             leftOnlies[order[2]] = nil
         end
@@ -67,6 +67,19 @@ function removeLeftValue(ordering, value)
     end
 end
 
+function filterRules(rules, manual)
+    filteredRules = {}
+
+    for i, pair in ipairs(rules) do
+        idx1 = findInList(manual, pair[1])
+        idx2 = findInList(manual, pair[2])
+        if idx1 and idx2 then
+            table.insert(filteredRules, pair)
+        end
+    end
+    return filteredRules
+end
+
 
 function createOrder(ordering) 
     resultOrder = {}
@@ -85,7 +98,7 @@ function createOrder(ordering)
             removeLeftValue(ordering, value)
             allValues[value] = nil
         end
-        print("New order ", table.concat(resultOrder, ", "))
+        -- print("New order ", table.concat(resultOrder, ", "))
     end
 
     count = 0
@@ -138,21 +151,25 @@ function getMiddle(list)
     return middleValue
 end
 
-ordering, manuals = parseInput("input")
-orderedList = createOrder(ordering)
-print("New order ", table.concat(orderedList, ", "))
 
-result = 0
+ordering, manuals = parseInput("input")
+
+resultValue = 0
 for i, manual in ipairs(manuals) do
+    filteredRules = filterRules(ordering, manual)
+    orderedList = createOrder(filteredRules)
+    -- print("New order ", table.concat(orderedList, ", "))
+    
     valid = checkManual(orderedList, manual)
     print ("Manual", table.concat(manual, ", "), " is ")
     if valid then
-        print "correct"
-        result = result + getMiddle(manual)
+        middleValue = getMiddle(manual)
+        print ("correct: ", middleValue)
+        resultValue = resultValue + middleValue
     else
         print "wrong"
 
     end
 end
 
-print("Result: ", result)
+print("Result: ", resultValue)
