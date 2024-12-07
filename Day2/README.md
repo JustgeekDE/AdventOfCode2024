@@ -10,4 +10,4 @@ Straight forward, parse the data, iterate over each line pairwaise. For each pai
 
 # Approach to part two
 
-There might be some solution with storing the differences and checking if we can reduce the list by adding an unsafe value with the previous or next one. But this is C - Not very sophisticated in it's tools but very fast. So we are gonna brute force it. For every line that is deemed unsafe, iterate over each value and create a new list that skips that particular value.
+There might be some solution with storing the differences and checking if we can reduce the list by adding an unsafe value with the previous or next one. But this is C - Not very sophisticated in its tools but very fast. So we are gonna brute force it. For every line that is deemed unsafe, iterate over each value and create a new list that skips that particular value.
