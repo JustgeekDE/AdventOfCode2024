@@ -23,23 +23,23 @@ processFile filePath = do
     let parsedData = map parseLine linesList
     return parsedData
 
--- Recursive evaluation with logging
-recursiveEvaluationWithLogging :: [Int] -> IO [Int]
-recursiveEvaluationWithLogging [] = return []
-recursiveEvaluationWithLogging [x] = return [x]
-recursiveEvaluationWithLogging (x:xs) = do
-    subValues <- recursiveEvaluationWithLogging xs
-    let result = concatMap (\value -> [x + value, x * value]) subValues
-    -- Print the intermediate results here
-    putStrLn $ "Evaluating: " ++ show x ++ " with subValues: " ++ show subValues
-    putStrLn $ "Resulting values: " ++ show result
+-- combine two ints with "||"
+combineInts :: Int -> Int -> Int
+combineInts x y = read (show x ++ show y) :: Int
+
+recursiveEvaluation :: [Int] -> IO [Int]
+recursiveEvaluation [] = return []
+recursiveEvaluation [x] = return [x]
+recursiveEvaluation (x:xs) = do
+    subValues <- recursiveEvaluation xs
+    let result = concatMap (\value -> [x + value, x * value, combineInts value x]) subValues
     return result
 
 -- Check if the result appears in the recursive evaluation
 isValidCalibration :: SingleEquation -> IO Bool
 isValidCalibration (SingleEquation { result = res, values = vals }) = do
     let reversedVals = reverse vals
-    evaluatedValues <- recursiveEvaluationWithLogging reversedVals
+    evaluatedValues <- recursiveEvaluation reversedVals
     return $ res `elem` evaluatedValues
 
 checkCalibrations :: [SingleEquation] -> IO ()
@@ -57,6 +57,6 @@ checkCalibrations equations = do
 
 main :: IO ()
 main = do
-    let filePath = "example.txt"
+    let filePath = "input"
     parsedData <- processFile filePath  
     checkCalibrations parsedData
