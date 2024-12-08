@@ -33,19 +33,30 @@ let process_line line y_pos towers =
     in
     loop 0 TowerPositions.empty 0 0
 
-let get_antinodes (x1, y1) (x2, y2) = 
+let get_antinodes (x1, y1) (x2, y2) max_x max_y =
     let dx = x1 - x2 in
     let dy = y1 - y2 in
-    [(x1 + dx, y1 + dy); (x2 - dx, y2 - dy)]
 
-let calculate_antinodes_for_frequency antenna = 
+    let rec generate_antinodes (x, y) dx dy acc =
+        if x >= 0 && y >= 0 && x < max_x && y < max_y then
+            generate_antinodes (x + dx, y + dy) dx dy ((x, y) :: acc)
+        else
+            acc
+    in
+
+    let first_antinodes = generate_antinodes (x1, y1) dx dy [] in
+    let second_antinodes = generate_antinodes (x1, y1) (-dx) (-dy) [] in
+    first_antinodes @ second_antinodes  (* Combine both results *)
+    
+
+let calculate_antinodes_for_frequency antenna max_x max_y = 
     let rec loop lst locations =
         match lst with 
         | [] -> locations
         | p1 :: rest ->
             let updated_locations = List.fold_left (fun locations p2 ->
-                let nodes = get_antinodes p1 p2 in
-                List.rev_append nodes locations  (* Efficient accumulation *)
+                let nodes = get_antinodes p1 p2 max_x max_y in
+                List.rev_append nodes locations
             ) locations rest in
             loop rest updated_locations
     in loop antenna []
@@ -67,16 +78,11 @@ let () =
     let tower_positions, max_x, max_y = process_file filename in
     Printf.printf "Map size is (%d / %d)\n" max_y max_x;
     let total_antinode_locations = ref [] in
-    TowerPositions.iter (fun c positions ->
-      Printf.printf "Calculating antinodes for '%c' at positions: %s\n" c
-          (String.concat "; " (List.map (fun (line, col) -> Printf.sprintf "(%d / %d)" line col) positions));
-      total_antinode_locations := List.rev_append (calculate_antinodes_for_frequency positions) !total_antinode_locations
+    TowerPositions.iter (fun _ positions ->
+      total_antinode_locations := List.rev_append (calculate_antinodes_for_frequency positions max_x max_y) !total_antinode_locations
     ) tower_positions;
     let valid_antinode_locations = 
         filter_valid_coordinates max_x max_y !total_antinode_locations in
     let unique_antinode_locations = remove_duplicates valid_antinode_locations in
-        List.iter (fun (x, y) ->
-        Printf.printf "(%d / %d) " x y
-        ) unique_antinode_locations;
     let num_unique_locations = List.length unique_antinode_locations in
         Printf.printf "\nNumber of unique valid locations: %d\n" num_unique_locations        

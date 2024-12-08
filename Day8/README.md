@@ -8,3 +8,4 @@ Parse the data and create listsfor each frequency, with the co-ordinates of each
 
 # Approach to part two
 
+Adjust the calculation of antinodes to calculate in either direction, until we get out of bounds of the map. Technically it shouldn't be too hard, but since the `get_antinodes` function if fairly deep inside the code, it will require a lot of adjustments of arguments.
