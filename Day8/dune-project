@@ -1,0 +1,10 @@
+(lang dune 3.17)
+
+(name day8)
+
+(generate_opam_files true)
+
+(package
+ (name day8)
+ (synopsis "Advent of Code 2024 Day 8 solution")
+ (depends ocaml))
