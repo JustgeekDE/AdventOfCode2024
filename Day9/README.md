@@ -21,3 +21,9 @@ The uncompressed disk number could get massive. So far everything should be O(n)
 
 # Approach to part two
 
+Disregard most of the solution for part one. The compressed format is actually more helpful. We want a list of blocks which are either empty or not, and their size. We than have one loop by descending ID and inside we search for the first empty block that is big enough from the front of the list. 
+We probably can modify the list in place, but that seems complicated, so in the first try I'll just create a new copy after each merge.
+
+When moving blocks we need to be careful to resize the existing blocks.
+
+I ended up doing a completly unnecessary function to merge empty blocks, since they can only appear at the position we just removed some data blocks, we will never move something new here. D'oh!
