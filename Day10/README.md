@@ -8,3 +8,5 @@ Scan the input for starting points. Then run a depth first search from each poin
 
 
 # Approach to part two
+
+Switch the set to a list, that should do it.
