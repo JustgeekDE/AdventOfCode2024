@@ -29,9 +29,9 @@ function getStartPosition($map)
 
 function printMap($map)
 {
-    foreach ($map as $y => $line) {
-        echo implode("", $line) . "\n";
-    }
+    // foreach ($map as $y => $line) {
+    //     echo implode("", $line) . "\n";
+    // }
 }
 
 
@@ -125,8 +125,8 @@ function detectLoop($map, $x, $y, $dir)
     while (!$exited) {
         $visited = checkAndSetVisited($visitedMap, $x, $y, $dir);
         if ($visited[0]) {
-            echo "Found a loop! (" . $x . " / " . $y . " )\n";
-            printVisitedMap($map, $visitedMap);
+            // echo "Found a loop! (" . $x . " / " . $y . " )\n";
+            // printVisitedMap($map, $visitedMap);
             return true;
         }
         $visitedMap = $visited[1];

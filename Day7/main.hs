@@ -46,7 +46,7 @@ checkCalibrations :: [SingleEquation] -> IO ()
 checkCalibrations equations = do
     validEquations <- filterM isValidCalibration equations
     let totalResult = sum $ map result validEquations
-    mapM_ printResult validEquations
+    -- mapM_ printResult validEquations
     putStrLn $ "Total sum of valid results: " ++ show totalResult
   where
     printResult eq = do

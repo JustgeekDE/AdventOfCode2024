@@ -1,5 +1,5 @@
 import std/sets
-import std/strutils
+import std/sequtils
 
 type Location = object
   x: int
@@ -14,7 +14,6 @@ proc parseInput(filename: string) : Map =
     var data = newSeq[seq[int]]()
     var max_x = 0
     for line in lines filename:
-        echo line
         var currentLine = newSeq[int]()
         for value in line:
             let height = int(value) - int('0')
@@ -48,9 +47,9 @@ proc getValue(location: Location, map: Map) : int =
     return getValue(location.x, location.y, map)
 
 
-proc findPeaksForStart(start: Location, map : Map) : HashSet[Location]
+proc findPeaksForStart(start: Location, map : Map) : seq[Location]
 
-proc checkSlope(start: Location, x_dif:int, y_dif:int, map: Map) : HashSet[Location] =
+proc checkSlope(start: Location, x_dif:int, y_dif:int, map: Map) : seq[Location] =
     let currentHeight = getValue(start, map)
     let nextHeight = getValue(start.x + x_dif, start.y + y_dif, map)
 
@@ -58,29 +57,28 @@ proc checkSlope(start: Location, x_dif:int, y_dif:int, map: Map) : HashSet[Locat
         let newLocation = Location(x: start.x + x_dif, y:start.y + y_dif)
         return findPeaksForStart(newLocation, map)
 
-    return initHashSet[Location]()
+    return newSeq[Location]()
 
 
 
-proc findPeaksForStart(start: Location, map : Map) : HashSet[Location] =
-    var returnValue = initHashSet[Location]()
+proc findPeaksForStart(start: Location, map : Map) : seq[Location] =
     if (start.x < 0) or (start.x >= map.max_x):
-        return returnValue
+        return newSeq[Location]()
     if (start.y < 0) or (start.y >= map.max_y):
-        return returnValue
+        return newSeq[Location]()
 
     let currentHeight = getValue(start, map)
     if  currentHeight == 9:
-        returnValue.incl(Location(x: start.x, y: start.y))
-        return returnValue
-    echo "Checking location ", start
+        var res = newSeq[Location]()
+        res.add(start)
+        return res
 
-    returnValue.incl(checkSlope(start, 1, 0 , map))
-    returnValue.incl(checkSlope(start, 0, 1 , map))
-    returnValue.incl(checkSlope(start, -1, 0, map))
-    returnValue.incl(checkSlope(start, 0, -1, map))
-
-    return returnValue
+    return concat(
+            checkSlope(start,  1, 0 , map), 
+            checkSlope(start,  0, 1 , map), 
+            checkSlope(start, -1, 0 , map), 
+            checkSlope(start, 0, -1 , map), 
+            )
 
 proc findScores(map:Map): int =
     var score = 0
@@ -88,7 +86,7 @@ proc findScores(map:Map): int =
     for location in startLocations:
         let peaks = findPeaksForStart(location, map)
         # echo "Start: ", location, " has ", peaks.card(), " peaks reachable"
-        score = score + peaks.card() 
+        score = score + peaks.len() 
 
 
     return score
