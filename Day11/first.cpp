@@ -112,9 +112,6 @@ int main(int argc, char* argv[]) {
     for(int i = 1; i <= 25; i++) {
         blink(head);
         std::cout << "After " << i << " iterations, there are " << count(head) << " stones." << std::endl;
-        // if (i< 7) {
-        //     std::cout << *head << std::endl;            
-        // }
     }
     return 0;
 }
