@@ -9,13 +9,7 @@
 class Stone{
     private:
         uint64_t value;
-        std::shared_ptr<Stone> next;
-
-        void blink_next() {
-            if(this->next != nullptr) {
-                this->next->blink();
-            }
-        }
+        Stone* next;
 
     public:
         Stone(int64_t number) {
@@ -27,11 +21,11 @@ class Stone{
             return this->value;
         }
 
-        std::shared_ptr<Stone> getNext() {
+        Stone* getNext() {
             return this->next;
         }
 
-        void setNext(std::shared_ptr<Stone> nextStone) {
+        void setNext(Stone* nextStone) {
             this->next = nextStone;
         }
 
@@ -47,7 +41,6 @@ class Stone{
         void blink() {
             if (this->value == 0) {
                 this->value = 1;
-                this->blink_next();
                 return;
             }
             auto digits = std::floor(std::log10(this->value)) + 1.0;
@@ -57,35 +50,24 @@ class Stone{
                 // std::cout<< "Split " << this->value << " into " << first << " and " << second << std::endl;
                 auto next = this->next;
                 this->value = first;
-                this->next = std::make_shared<Stone>(second);
+                this->next = new Stone(second);
                 if (this->next == nullptr) {
                     std::cerr << "Error allocating pointer"<<std::endl;
                 }
                 this->next->setNext(next);
-                if(next != nullptr) {
-                    next->blink();
-                }
                 return;
             }
             this->value = value * 2024;
-            this->blink_next();
             return;
-        }
-
-        int64_t count(int64_t initialValue) {
-            if(this->next == nullptr) {
-                return initialValue + 1;
-            }
-            return this->next->count(initialValue+1);
         }
 };
 
 
 
-std::shared_ptr<Stone>  parseInput(char* filename) {
-    std::shared_ptr<Stone> current =nullptr;
-    std::shared_ptr<Stone> last =nullptr;
-    std::shared_ptr<Stone> head =nullptr;
+Stone* parseInput(char* filename) {
+    Stone* current =nullptr;
+    Stone* last =nullptr;
+    Stone* head =nullptr;
 
     std::cout << "Reading file: " << filename << std::endl;
     std::ifstream myfile( filename, std::ios_base::in);
@@ -93,7 +75,7 @@ std::shared_ptr<Stone>  parseInput(char* filename) {
     int64_t temp;
     while (myfile >> temp)    {
         // std::cout<< "Got value: "<< temp << std::endl;
-        current = std::make_shared<Stone>(temp);
+        current = new Stone(temp);
         if (last != nullptr) {
             last->setNext(current);
         } else {
@@ -105,13 +87,31 @@ std::shared_ptr<Stone>  parseInput(char* filename) {
     return head;
 }
 
+void blink(Stone* current) {
+
+    while(current != nullptr) {
+        auto next = current->getNext();
+        current->blink();
+        current = next;
+    }
+}
+
+int count(Stone* current) {
+    int result = 0;
+    while(current != nullptr) {
+        result += 1;
+        current = current->getNext();
+    }
+    return result;
+}
+
 int main(int argc, char* argv[]) {
     auto head = parseInput(argv[1]);
 
     std::cout << *head << std::endl;
     for(int i = 1; i <= 25; i++) {
-        head->blink();
-        std::cout << "After " << i << " iterations, there are " << head->count(0) << " stones." << std::endl;
+        blink(head);
+        std::cout << "After " << i << " iterations, there are " << count(head) << " stones." << std::endl;
         // if (i< 7) {
         //     std::cout << *head << std::endl;            
         // }
