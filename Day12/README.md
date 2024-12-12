@@ -11,3 +11,4 @@ To calculate the area later, we only need to check how many tiles are in each re
 
 # Approach to part two
 
+The number of sides is equal to the number of corners a shape has. The obtuse corners should be easy to find, just by checking the four directly adjecent tiles. The acute corners are a bit harder to find, for those we need to check the diagonals as well. But it should be possible to reduce the number of checks by a factor of 4, by using the rotational symetry.
