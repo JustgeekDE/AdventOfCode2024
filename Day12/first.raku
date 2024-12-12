@@ -36,6 +36,17 @@ class Region {
         return $circumference;
     }
 
+    method sides($map) {
+        my $sides = 0;
+        for @.coordinates.kv -> $index, @tile {
+            my $x = @tile[0];
+            my $y = @tile[1];
+            $sides += $map.countCorners($x, $y);
+
+        }
+        return $sides;
+    }
+
 }
 
 class Map {
@@ -54,8 +65,9 @@ class Map {
             my $plant = $region.plant;
             my $area = $region.area();
             my $circ = $region.circumference(self);
-            say "  Region $index has plant $plant with an area of $area and fence length of $circ";
-            $totalPrice += ($area * $circ);
+            my $sides = $region.sides(self);
+            say "  Region $index has plant $plant with an area of $area, a fence length of $circ and $sides sides.";
+            $totalPrice += ($area * $sides);
         }
         say "For a total price of $totalPrice";
     }
@@ -107,7 +119,57 @@ class Map {
         return @.data[$y].substr($x,1);
     }
 
+    method countCorners($x,$y) {
+        my $plant = self.getPlant($x, $y);
+        my $neighbourCount = 0;
+        my $north = self.getPlant($x, $y-1) eq $plant;
+        my $south = self.getPlant($x, $y+1) eq $plant;
+        my $east = self.getPlant($x+1, $y) eq $plant;
+        my $west = self.getPlant($x-1, $y) eq $plant;
 
+        if $north {$neighbourCount++};
+        if $south {$neighbourCount++};
+        if $east {$neighbourCount++};
+        if $west {$neighbourCount++};
+
+        if ($neighbourCount == 4) {
+            return self.countAcuteCorners($x, $y);
+        }
+        if ($neighbourCount == 3) {
+            return self.countAcuteCorners($x, $y);
+        }
+        if ($neighbourCount == 2) {
+            if ($north != $south) {
+                return 1 + self.countAcuteCorners($x, $y);
+            }
+            return 0;
+        }
+        if ($neighbourCount == 1) {
+            return 2;
+        }
+        return 4;
+    }
+
+    method countAcuteCorners($x, $y) {
+        my $result = 0;
+        $result += self.isAcuteCorner($x,$y, -1, -1);
+        $result += self.isAcuteCorner($x,$y, 1, -1);
+        $result += self.isAcuteCorner($x,$y, -1, 1);
+        $result += self.isAcuteCorner($x,$y, 1, 1);
+        return $result;
+    }
+
+    method isAcuteCorner($x, $y, $dx, $dy) {
+        my $plant = self.getPlant($x, $y);
+        my $corner = self.getPlant($x + $dx, $y+$dy) ne $plant;
+        my $xDir = self.getPlant($x+$dx, $y) eq $plant;
+        my $yDir = self.getPlant($x, $y+$dy) eq $plant;
+        
+        if ($xDir && $yDir && $corner) {
+            return 1;
+        }
+        return 0;
+    }
 }
 
 sub parseInput($filename) {
