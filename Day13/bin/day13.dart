@@ -2,7 +2,7 @@ import 'package:day13/machine.dart' as machine;
 import 'dart:io';
 
 void main(List<String> arguments) async {
- final filePath = "input";
+ final filePath = "example.txt";
 
   try {
     final input = await File(filePath).readAsString();
@@ -11,7 +11,7 @@ void main(List<String> arguments) async {
     int totalCost = 0;
     for (final entry in entries) {
       print(entry);
-      var cost = entry.bestCost();
+      var cost = entry.bestCost2();
       if (cost != null) {
         totalCost += cost;
       }

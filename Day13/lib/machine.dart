@@ -11,6 +11,10 @@ class Point {
     return Point(this.x + other.x, this.y + other.y);
   }
 
+  Point operator -(Point other) {
+    return Point(this.x - other.x, this.y - other.y);
+  }
+
   Point operator *(int scalar) {
     return Point(this.x * scalar, this.y * scalar);
   }
@@ -53,6 +57,33 @@ class Entry {
     }
     return null;
   }
+
+  int? bestCost2() {
+    int? bestCost = null; 
+    int a = 0;
+    while (true) {
+        final pointA = buttonA * a;
+        // print("Testing $a: ");
+        // print("  $pointA");
+        // print("  $prize");
+        if ((pointA.x > prize.x) || (pointA.y > prize.y)) {
+            break;
+        }
+
+        final pointB = prize - pointA;
+        final mx = pointB.x / buttonB.x;
+        final my = pointB.y / buttonB.y;
+        if ((mx == my) && (mx == mx.roundToDouble())){
+            final int cost = a * 3 + mx.round();
+            if ((bestCost == null ) || (cost < bestCost)) {
+                print('Found a match with cost $cost');
+                bestCost = cost;
+            }
+        }
+        a += 1;
+    } 
+    return bestCost;
+  }
 }
 
 List<Entry> parseInput(String input) {
@@ -83,7 +114,7 @@ Point parsePoint(String pointData, {bool isPrize = false}) {
   if (match != null) {
     final x = int.parse(match.group(1)!);
     final y = int.parse(match.group(2)!);
-    return Point(x, y);
+    return isPrize ? Point(x+10000000000000, y+10000000000000) : Point(x,y,);
   } else {
     throw FormatException('Invalid point format: $pointData');
   }
