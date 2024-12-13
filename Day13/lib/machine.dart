@@ -1,3 +1,5 @@
+import 'dart:math';
+
 class Point {
   int x;
   int y;
@@ -41,48 +43,18 @@ class Entry {
   String toString() => 'Button A: $buttonA, Button B: $buttonB, Prize: $prize';
 
   int? bestCost() {
-    int bestCost = 4001; // Should be more than the maximum of 100*(3+1)
-    for (var a = 0; a <= 100; a++) {
-        for (var b = 0; b <= 100; b++) {
-            final cost = a * 3 + b;
-            final result = (buttonA * a) + (buttonB * b);
-            if ((result == prize) && (cost < bestCost)) {
-                print('Found a match with cost $cost');
-                bestCost = cost;
-            }
-        } 
-    } 
-    if (bestCost < 4001) {
-        return bestCost;
+    final f =(prize.y * buttonB.x - prize.x *buttonB.y) / (prize.x * buttonA.y - prize.y *buttonA.x);
+    final b = (prize.y ) / (f*buttonA.y + buttonB.y);
+    final a = f *b;
+
+    // print("Target f: $f, a: $a, b: $b");
+
+    final result = (buttonA * a.round()) + (buttonB * b.round());
+    if (result == prize) {
+        print("Found result, a: $a, b: $b");
+        return (a.round() * 3) + b.round();
     }
     return null;
-  }
-
-  int? bestCost2() {
-    int? bestCost = null; 
-    int a = 0;
-    while (true) {
-        final pointA = buttonA * a;
-        // print("Testing $a: ");
-        // print("  $pointA");
-        // print("  $prize");
-        if ((pointA.x > prize.x) || (pointA.y > prize.y)) {
-            break;
-        }
-
-        final pointB = prize - pointA;
-        final mx = pointB.x / buttonB.x;
-        final my = pointB.y / buttonB.y;
-        if ((mx == my) && (mx == mx.roundToDouble())){
-            final int cost = a * 3 + mx.round();
-            if ((bestCost == null ) || (cost < bestCost)) {
-                print('Found a match with cost $cost');
-                bestCost = cost;
-            }
-        }
-        a += 1;
-    } 
-    return bestCost;
   }
 }
 
@@ -115,6 +87,7 @@ Point parsePoint(String pointData, {bool isPrize = false}) {
     final x = int.parse(match.group(1)!);
     final y = int.parse(match.group(2)!);
     return isPrize ? Point(x+10000000000000, y+10000000000000) : Point(x,y,);
+    // return Point(x,y,);
   } else {
     throw FormatException('Invalid point format: $pointData');
   }
