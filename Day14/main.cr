@@ -42,18 +42,81 @@ def print_map(robots : Array(Tuple(Int32, Int32)), map_size : Tuple(Int32, Int32
     robots.each do |robot|
         map[robot[1]][robot[0]] += 1
     end
+
+    puts " "
+    print "|"
+    (0..map_size[0]-1).each do |i|
+        print "-"
+    end
+    puts "|"
+
     map.each do |row|
         print "|"
         row.each do |value|
             if value > 0
                 print "#{value}"
             else
-                print "."
+                print " "
             end
         end
         puts "|"
     end
+
+    print "|"
+    (0..map_size[0]-1).each do |i|
+        print "-"
+    end
+    puts "|"
+end
+
+def get_map_value(map : Array(Array(Int32)), map_size : Tuple(Int32, Int32), position : Tuple(Int32, Int32)) : Int32
+    x = position[0] % map_size[0]
+    y = position[1] % map_size[1]
+
+    return map[y][x]
+end
+
+def calculate_distance_score(robots : Array(Tuple(Int32, Int32)), map_size : Tuple(Int32, Int32)) : Int32
+    map = Array.new(map_size[1]) { Array.new(map_size[0], 0) }
+    distance_score = 0
   
+    robots.each do |robot|
+        map[robot[1]][robot[0]] += 1
+    end
+    robots.each do |robot|
+        x = robot[0]
+        y = robot[1]
+        robot_score = 0;
+        robot_score += get_map_value(map, map_size, {x-1, y-1})
+        robot_score += get_map_value(map, map_size, {x-1, y  })
+        robot_score += get_map_value(map, map_size, {x-1, y+1})
+        robot_score += get_map_value(map, map_size, {x  , y-1})
+        robot_score += get_map_value(map, map_size, {x  , y  })
+        robot_score += get_map_value(map, map_size, {x  , y+1})
+        robot_score += get_map_value(map, map_size, {x+1, y-1})
+        robot_score += get_map_value(map, map_size, {x+1, y  })
+        robot_score += get_map_value(map, map_size, {x+1, y+1})
+        if (robot_score > 0) && (robot_score <  4)
+            distance_score += robot_score
+        end
+    end
+  distance_score
+end
+
+def calculate_alone_score(robots : Array(Tuple(Int32, Int32)), map_size : Tuple(Int32, Int32)) : Int32
+    map = Array.new(map_size[1]) { Array.new(map_size[0], 0) }
+    distance_score = 0
+  
+    robots.each do |robot|
+        map[robot[1]][robot[0]] += 1
+    end
+    robots.each do |robot|
+        value = map[robot[1]][robot[0]]
+        if value == 1
+            distance_score += 1
+        end
+    end
+  distance_score
 end
 
 def calculate_result(robots : Array(Tuple(Int32, Int32)), map_size : Tuple(Int32, Int32))
@@ -78,16 +141,23 @@ def calculate_result(robots : Array(Tuple(Int32, Int32)), map_size : Tuple(Int32
 end
 
 file_path = "input"
-time = 100;
+# time = 100;
 bounds = {101,103}
 robots = parse_robots(file_path)
-new_positions = [] of Tuple(Int32, Int32)
 
-robots.each do |robot|
-    new_position = robot.move(time, bounds)
-    # puts "Robot moved to Position=#{new_position}"
-    new_positions << new_position
+(0..10000).each do |time|
+    new_positions = [] of Tuple(Int32, Int32)
+    robots.each do |robot|
+        new_position = robot.move(time, bounds)
+        new_positions << new_position
+    end
+    score = calculate_alone_score(new_positions, bounds)
+    if score > 0
+
+        puts "The time is now: #{time}, the score is #{score}"
+        print_map(new_positions, bounds)
+    end
 end
 
-print_map(new_positions, bounds)
-calculate_result(new_positions, bounds)
+
+# calculate_result(new_positions, bounds)
